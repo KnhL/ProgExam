@@ -26,7 +26,7 @@ public class BoundaryPoint : MonoBehaviour
     {
         startPos = transform.position;
         
-        thisMat = GetComponent<Renderer>().materials[1];
+        thisMat = GetComponent<Renderer>().materials[1];    
     }
 
     private void Update()
@@ -36,7 +36,7 @@ public class BoundaryPoint : MonoBehaviour
             if (justPressed)
             {
                 isPressed = false;
-                thisMat.SetFloat("_Size", 0);
+                thisMat.SetFloat("_Size", -.5f);
             }
             
             justPressed = true;
@@ -44,24 +44,37 @@ public class BoundaryPoint : MonoBehaviour
         
         if (isPressed)
         {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            
+            Vector3 position = this.transform.position;
+            
             switch (clampAxis)
             {
                 case ClampAxis.x:
-                    transform.position += new Vector3(Input.mouseScrollDelta.y,0,0);
+                    if (Physics.Raycast(ray, out var hit1, Mathf.Infinity, LayerMask.NameToLayer("MouseDetect")))
+                    {
+                        transform.position = new Vector3(hit1.point.x, position.y, position.z);
+                    }
                     break;
                 
                 case ClampAxis.y:
-                    transform.position += new Vector3(0, Input.mouseScrollDelta.y, 0);
+                    if (Physics.Raycast(ray, out var hit2, Mathf.Infinity, LayerMask.NameToLayer("MouseDetect")))
+                    {
+                        transform.position = new Vector3(position.x, hit2.point.y, position.z);
+                    }
                     break;
                 
                 case ClampAxis.z:
-                    transform.position += new Vector3(0, 0, Input.mouseScrollDelta.y);
+                    if (Physics.Raycast(ray, out var hit3, Mathf.Infinity, LayerMask.NameToLayer("MouseDetect")))
+                    {
+                        transform.position = new Vector3(position.x, position.y, hit3.point.z);
+                    }
                     break;
                 
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            transform.position = VectorClamp(transform.position, distanceClamp, clampAxis);
+            transform.position = VectorClamp(transform.position,position, distanceClamp, clampAxis);
         }
     }
 
@@ -69,28 +82,29 @@ public class BoundaryPoint : MonoBehaviour
     {
         isPressed = true;
         justPressed = false;
-        thisMat.SetFloat("_Size", 0.7f);
+        thisMat.SetFloat("_Size", 0.2f);
+        
     }
 
-    private Vector3 VectorClamp(Vector3 target, Vector2 clamp, ClampAxis cAxis)
+    private Vector3 VectorClamp(Vector3 target, Vector3 currentPos, Vector2 clamp, ClampAxis cAxis)
     {
         switch (cAxis)
         {
             case ClampAxis.x:
                 target.x = Mathf.Clamp(target.x, clamp.x, clamp.y);
-                target.y = startPos.y;
-                target.z = startPos.z;
+                target.y = currentPos.y;
+                target.z = currentPos.z;
                 return target;
             
             case ClampAxis.y:
-                target.x = startPos.x;
+                target.x = currentPos.x;
                 target.y = Mathf.Clamp(target.y, clamp.x, clamp.y);
-                target.z = startPos.z;
+                target.z = currentPos.z;
                 return target;
             
             case ClampAxis.z:
-                target.x = startPos.x;
-                target.y = startPos.y;
+                target.x = currentPos.x;
+                target.y = currentPos.y;
                 target.z = Mathf.Clamp(target.z, clamp.x, clamp.y);
                 return target;
             
