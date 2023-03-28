@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3419405772244801559}
   - component: {fileID: 3409775341960792353}
   - component: {fileID: 3452682467902567767}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: table-television
   m_TagString: Untagged
   m_Icon: {fileID: 0}

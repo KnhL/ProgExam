@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6024563281497542573}
   - component: {fileID: 6030579304697561869}
   - component: {fileID: 5984107718609170241}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: wash-basin
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 45731965908361218}
   - component: {fileID: 37797365955282504}
   - component: {fileID: 14376048226125918}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: oven
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1622489099029592330}
   - component: {fileID: 1634611285390084396}
   - component: {fileID: 1591352976835043170}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: dishwasher
   m_TagString: Untagged
   m_Icon: {fileID: 0}

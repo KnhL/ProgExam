@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3984944014167351749}
   - component: {fileID: 3993369568802086753}
   - component: {fileID: 4025308053599895473}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: lamp
   m_TagString: Untagged
   m_Icon: {fileID: 0}
