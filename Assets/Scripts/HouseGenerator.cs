@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public enum Directions
 {
@@ -34,14 +35,36 @@ public class HouseGenerator : MonoBehaviour
     
     [SerializeField] private BoxCollider col;
 
+    [SerializeField] private Transform zMaxBoundPoint;
+    [SerializeField] private Transform zMinBoundPoint;
+    [SerializeField] private Transform xMaxBoundPoint;
+    [SerializeField] private Transform xMinBoundPoint;
+
     private Vector3 oldSize;
 
     private void FixedUpdate()
     {
+        float centerX = (xMinBoundPoint.position.x + xMaxBoundPoint.position.x) / 2;
+        float centerY = (xMinBoundPoint.position.y + xMaxBoundPoint.position.y + zMaxBoundPoint.position.y + zMinBoundPoint.position.y) / 4;
+        float centerZ = (zMaxBoundPoint.position.z + zMinBoundPoint.position.z) / 2;
+        
+        Vector3 center = new Vector3(centerX, centerY, centerZ);
+
+        Vector3 size = new Vector3(Vector3.Distance(xMinBoundPoint.position, xMaxBoundPoint.position), col.size.y,
+            Vector3.Distance(zMaxBoundPoint.position, zMinBoundPoint.position));
+        
+        col.center = center;
+        col.size = size;
+
+        var bounds1 = col.bounds;
+        xMaxBoundPoint.position = new Vector3(bounds1.max.x, centerY, centerZ);
+        xMinBoundPoint.position = new Vector3(bounds1.min.x, centerY, centerZ);
+        zMaxBoundPoint.position = new Vector3(centerX, centerY, bounds1.max.z);
+        zMinBoundPoint.position = new Vector3(centerX, centerY, bounds1.min.z);
+        
+
         colCenter = col.center;
 
-        col.hasModifiableContacts = true;
-        
         leftSide = FindBoundSide(Directions.Left);
         rightSide = FindBoundSide(Directions.Right);
         frontSide = FindBoundSide(Directions.Front);
@@ -183,7 +206,7 @@ public class HouseGenerator : MonoBehaviour
             }
             
             GameObject item = Instantiate(wallObject, position, quaternion.identity);
-            item.transform.eulerAngles = new Vector3(0, 0, 0);
+            item.transform.eulerAngles = new Vector3(0, 180, 0);
 
             var itemSize = item.transform.localScale;
             itemSize = new Vector3(size.x, size.y, itemSize.z);
