@@ -42,7 +42,7 @@ public class HouseGenerator : MonoBehaviour
 
     private Vector3 oldSize;
 
-    private void FixedUpdate()
+    private void Update()
     {
         float centerX = (xMinBoundPoint.position.x + xMaxBoundPoint.position.x) / 2;
         float centerY = (xMinBoundPoint.position.y + xMaxBoundPoint.position.y + zMaxBoundPoint.position.y + zMinBoundPoint.position.y) / 4;
@@ -69,20 +69,11 @@ public class HouseGenerator : MonoBehaviour
         rightSide = FindBoundSide(Directions.Right);
         frontSide = FindBoundSide(Directions.Front);
         backSide = FindBoundSide(Directions.Back);
-
+        
         if (update || oldSize != col.bounds.size)
         {
-            var bounds = col.bounds;
-
-            GenerateWall(wall, leftSide, bounds.center, bounds.size);
-            GenerateWall(wall, rightSide, bounds.center, bounds.size);
-            GenerateWall(wall, frontSide, bounds.center, bounds.size);
-            GenerateWall(wall, backSide, bounds.center, bounds.size);
-
-            update = false;
+            Generate();
         }
-
-        oldSize = col.bounds.size;
     }
 
     private void OnValidate()
@@ -114,110 +105,126 @@ public class HouseGenerator : MonoBehaviour
         };
     }
 
-    private void GenerateWall(GameObject wallObject, Vector3 position, Vector3 origin, Vector3 size)
+    public void Generate()
+    {
+        var bounds = col.bounds;
+
+        GenerateWall(wall, leftSide, bounds.center, bounds.size, "LEFT");
+        GenerateWall(wall, rightSide, bounds.center, bounds.size, "RIGHT");
+        GenerateWall(wall, frontSide, bounds.center, bounds.size, "FRONT");
+        GenerateWall(wall, backSide, bounds.center, bounds.size, "BACK");
+
+        update = false;
+        oldSize = col.bounds.size;
+    }
+
+    private void GenerateWall(GameObject wallObject, Vector3 position, Vector3 origin, Vector3 size, string type)
     {
         //print("WallGen");
+
+        GameObject item;
+        var itemSize = Vector3.zero;
+        WallList itemList = new WallList();
         
-        if (position.x < origin.x) // BACK
+        switch (type)
         {
-            for (int i = 0; i < currentWalls.Count; i++)
-            {
-                if (currentWalls[i].name == "BACK")
+            case "BACK":
+                for (int i = 0; i < currentWalls.Count; i++)
                 {
-                    Destroy(currentWalls[i].wall);
-                    currentWalls.RemoveAt(i);
+                    if (currentWalls[i].name == "BACK")
+                    {
+                        Destroy(currentWalls[i].wall);
+                        currentWalls.RemoveAt(i);
+                    }
                 }
-            }
             
-            GameObject item = Instantiate(wallObject, position, quaternion.identity);
-            item.transform.eulerAngles = new Vector3(0, 90, 0);
+                item = Instantiate(wallObject, position, quaternion.identity);
+                item.transform.eulerAngles = new Vector3(0, 90, 0);
 
-            var itemSize = item.transform.localScale;
-            itemSize = new Vector3(size.z, size.y, itemSize.z);
-            item.transform.localScale = itemSize;
+                itemSize = item.transform.localScale;
+                itemSize = new Vector3(size.z, size.y, itemSize.z);
+                item.transform.localScale = itemSize;
             
-            WallList itemList = new WallList
-            {
-                wall = item,
-                name = "BACK"
-            };
-            
-            currentWalls.Add(itemList);
-        }
-        else if (position.x > origin.x) // FRONT
-        {
-            for (int i = 0; i < currentWalls.Count; i++)
-            {
-                if (currentWalls[i].name == "FRONT")
+                itemList = new WallList
                 {
-                    Destroy(currentWalls[i].wall);
-                    currentWalls.RemoveAt(i);
-                }
-            }
+                    wall = item,
+                    name = "BACK"
+                };
             
-            GameObject item = Instantiate(wallObject, position, quaternion.identity);
-            item.transform.eulerAngles = new Vector3(0, 270, 0);
-
-            var itemSize = item.transform.localScale;
-            itemSize = new Vector3(size.z, size.y, itemSize.z);
-            item.transform.localScale = itemSize;   
-            
-            WallList itemList = new WallList
-            {
-                wall = item,
-                name = "FRONT"
-            };
-            currentWalls.Add(itemList);
-        }
-        else if (position.z < origin.z) // RIGHT
-        {
-            for (int i = 0; i < currentWalls.Count; i++)
-            {
-                if (currentWalls[i].name == "RIGHT")
+                currentWalls.Add(itemList);
+                break;
+            case "FRONT":
+                for (int i = 0; i < currentWalls.Count; i++)
                 {
-                    Destroy(currentWalls[i].wall);
-                    currentWalls.RemoveAt(i);
+                    if (currentWalls[i].name == "FRONT")
+                    {
+                        Destroy(currentWalls[i].wall);
+                        currentWalls.RemoveAt(i);
+                    }
                 }
-            }
             
-            GameObject item = Instantiate(wallObject, position, quaternion.identity);
-            item.transform.eulerAngles = new Vector3(0, 0, 0);
+                item = Instantiate(wallObject, position, quaternion.identity);
+                item.transform.eulerAngles = new Vector3(0, 270, 0);
 
-            var itemSize = item.transform.localScale;
-            itemSize = new Vector3(size.x, size.y, itemSize.z);
-            item.transform.localScale = itemSize;
+                itemSize = item.transform.localScale;
+                itemSize = new Vector3(size.z, size.y, itemSize.z);
+                item.transform.localScale = itemSize;   
             
-            WallList itemList = new WallList
-            {
-                wall = item,
-                name = "RIGHT"
-            };
-            currentWalls.Add(itemList);
-        }
-        else if (position.z > origin.z) // LEFT
-        {
-            for (int i = 0; i < currentWalls.Count; i++)
-            {
-                if (currentWalls[i].name == "LEFT")
+                itemList = new WallList
                 {
-                    Destroy(currentWalls[i].wall);
-                    currentWalls.RemoveAt(i);
+                    wall = item,
+                    name = "FRONT"
+                };
+                currentWalls.Add(itemList);
+                break;
+            case "RIGHT":
+                for (int i = 0; i < currentWalls.Count; i++)
+                {
+                    if (currentWalls[i].name == "RIGHT")
+                    {
+                        Destroy(currentWalls[i].wall);
+                        currentWalls.RemoveAt(i);
+                    }
                 }
-            }
             
-            GameObject item = Instantiate(wallObject, position, quaternion.identity);
-            item.transform.eulerAngles = new Vector3(0, 180, 0);
+                item = Instantiate(wallObject, position, quaternion.identity);
+                item.transform.eulerAngles = new Vector3(0, 0, 0);
+                
+                itemSize = item.transform.localScale;
+                itemSize = new Vector3(size.x, size.y, itemSize.z);
+                item.transform.localScale = itemSize;
+            
+                itemList = new WallList
+                {
+                    wall = item,
+                    name = "RIGHT"
+                };
+                currentWalls.Add(itemList);
+                break;
+            case "LEFT":
+                for (int i = 0; i < currentWalls.Count; i++)
+                {
+                    if (currentWalls[i].name == "LEFT")
+                    {
+                        Destroy(currentWalls[i].wall);
+                        currentWalls.RemoveAt(i);
+                    }
+                }
+            
+                item = Instantiate(wallObject, position, quaternion.identity);
+                item.transform.eulerAngles = new Vector3(0, 180, 0);
 
-            var itemSize = item.transform.localScale;
-            itemSize = new Vector3(size.x, size.y, itemSize.z);
-            item.transform.localScale = itemSize;
+                itemSize = item.transform.localScale;
+                itemSize = new Vector3(size.x, size.y, itemSize.z);
+                item.transform.localScale = itemSize;
             
-            WallList itemList = new WallList
-            {
-                wall = item,
-                name = "LEFT"
-            };
-            currentWalls.Add(itemList);
+                itemList = new WallList
+                {
+                    wall = item,
+                    name = "LEFT"
+                };
+                currentWalls.Add(itemList);
+                break;
         }
     }
     
