@@ -17,6 +17,8 @@ public class BoundaryPoint : MonoBehaviour
     [SerializeField] private ClampAxis clampAxis;
     [SerializeField] private Vector2 distanceClamp;
     [SerializeField] private LayerMask layerMask;
+    [SerializeField] private LayerMask UIMask;
+    
 
     private bool isPressed;
     private bool justPressed;
@@ -34,15 +36,35 @@ public class BoundaryPoint : MonoBehaviour
 
     private void Update()
     {
+        // MOUSE SELECT
+        
+        
+
+        if (Camera.main != null && Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out var hit, Mathf.Infinity, UIMask))
+        {
+            if (Input.GetMouseButtonDown(0) && hit.transform == transform)
+            {
+                if (justPressed)
+                {
+                    Highlight(false);
+                    return;
+                }
+
+                Highlight(true);
+            }
+        }
+        
         if (Input.GetMouseButtonDown(0) && isPressed)
         {
             if (justPressed)
             {
-                UnHighlight();
+                Highlight(false);
             }
-            
+
             justPressed = true;
         }
+        
+        // MOVEMENT
         
         if (isPressed)
         {
@@ -82,24 +104,21 @@ public class BoundaryPoint : MonoBehaviour
         }
     }
 
-    private void OnMouseDown()
+    private void Highlight(bool state)
     {
-        if (isPressed)
+        switch (state)
         {
-            UnHighlight();
-            return;
+            case true:
+                isPressed = true;
+                thisMat.SetFloat("_Size", 0.2f);
+                break;
+            case false:
+                isPressed = false;
+                justPressed = false;
+                thisMat.SetFloat("_Size", -.5f);
+                break;
         }
-        
-        isPressed = true;
-        justPressed = false;
-        thisMat.SetFloat("_Size", 0.2f);
-        
-    }
-
-    private void UnHighlight()
-    {
-        isPressed = false;
-        thisMat.SetFloat("_Size", -.5f);
+       
     }
 
     private Vector3 VectorClamp(Vector3 target, Vector3 currentPos, Vector2 clamp, ClampAxis cAxis)

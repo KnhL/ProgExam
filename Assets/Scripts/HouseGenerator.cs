@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 
 public enum Directions
 {
@@ -22,9 +22,12 @@ public class HouseGenerator : MonoBehaviour
         public string name;
     }
 
-    [SerializeField] private List<WallList> currentWalls = new List<WallList>();
+    [SerializeField] private List<WallList> currentOuterWalls = new List<WallList>();
+    [SerializeField] private List<WallList> currentInnerWalls = new List<WallList>();
 
     [SerializeField] private bool update;
+
+    [SerializeField] private Vector2 minMaxRoomPoint;
     
     private Vector3 colCenter;
 
@@ -109,16 +112,16 @@ public class HouseGenerator : MonoBehaviour
     {
         var bounds = col.bounds;
 
-        GenerateWall(wall, leftSide, bounds.center, bounds.size, "LEFT");
-        GenerateWall(wall, rightSide, bounds.center, bounds.size, "RIGHT");
-        GenerateWall(wall, frontSide, bounds.center, bounds.size, "FRONT");
-        GenerateWall(wall, backSide, bounds.center, bounds.size, "BACK");
+        GenerateWall(wall, leftSide, bounds.size, "LEFT");
+        GenerateWall(wall, rightSide, bounds.size, "RIGHT");
+        GenerateWall(wall, frontSide, bounds.size, "FRONT");
+        GenerateWall(wall, backSide, bounds.size, "BACK");
 
         update = false;
         oldSize = col.bounds.size;
     }
 
-    private void GenerateWall(GameObject wallObject, Vector3 position, Vector3 origin, Vector3 size, string type)
+    private void GenerateWall(GameObject wallObject, Vector3 position, Vector3 size, string type)
     {
         //print("WallGen");
 
@@ -129,12 +132,12 @@ public class HouseGenerator : MonoBehaviour
         switch (type)
         {
             case "BACK":
-                for (int i = 0; i < currentWalls.Count; i++)
+                for (int i = 0; i < currentOuterWalls.Count; i++)
                 {
-                    if (currentWalls[i].name == "BACK")
+                    if (currentOuterWalls[i].name == "BACK")
                     {
-                        Destroy(currentWalls[i].wall);
-                        currentWalls.RemoveAt(i);
+                        Destroy(currentOuterWalls[i].wall);
+                        currentOuterWalls.RemoveAt(i);
                     }
                 }
             
@@ -151,15 +154,15 @@ public class HouseGenerator : MonoBehaviour
                     name = "BACK"
                 };
             
-                currentWalls.Add(itemList);
+                currentOuterWalls.Add(itemList);
                 break;
             case "FRONT":
-                for (int i = 0; i < currentWalls.Count; i++)
+                for (int i = 0; i < currentOuterWalls.Count; i++)
                 {
-                    if (currentWalls[i].name == "FRONT")
+                    if (currentOuterWalls[i].name == "FRONT")
                     {
-                        Destroy(currentWalls[i].wall);
-                        currentWalls.RemoveAt(i);
+                        Destroy(currentOuterWalls[i].wall);
+                        currentOuterWalls.RemoveAt(i);
                     }
                 }
             
@@ -175,15 +178,15 @@ public class HouseGenerator : MonoBehaviour
                     wall = item,
                     name = "FRONT"
                 };
-                currentWalls.Add(itemList);
+                currentOuterWalls.Add(itemList);
                 break;
             case "RIGHT":
-                for (int i = 0; i < currentWalls.Count; i++)
+                for (int i = 0; i < currentOuterWalls.Count; i++)
                 {
-                    if (currentWalls[i].name == "RIGHT")
+                    if (currentOuterWalls[i].name == "RIGHT")
                     {
-                        Destroy(currentWalls[i].wall);
-                        currentWalls.RemoveAt(i);
+                        Destroy(currentOuterWalls[i].wall);
+                        currentOuterWalls.RemoveAt(i);
                     }
                 }
             
@@ -199,15 +202,15 @@ public class HouseGenerator : MonoBehaviour
                     wall = item,
                     name = "RIGHT"
                 };
-                currentWalls.Add(itemList);
+                currentOuterWalls.Add(itemList);
                 break;
             case "LEFT":
-                for (int i = 0; i < currentWalls.Count; i++)
+                for (int i = 0; i < currentOuterWalls.Count; i++)
                 {
-                    if (currentWalls[i].name == "LEFT")
+                    if (currentOuterWalls[i].name == "LEFT")
                     {
-                        Destroy(currentWalls[i].wall);
-                        currentWalls.RemoveAt(i);
+                        Destroy(currentOuterWalls[i].wall);
+                        currentOuterWalls.RemoveAt(i);
                     }
                 }
             
@@ -223,8 +226,58 @@ public class HouseGenerator : MonoBehaviour
                     wall = item,
                     name = "LEFT"
                 };
-                currentWalls.Add(itemList);
+                currentOuterWalls.Add(itemList);
                 break;
+        }
+    }
+
+    private void GenerateWall(GameObject wallObject, Vector3 position, Vector3 size)
+    {
+        var itemSize = Vector3.zero;
+        WallList itemList = new WallList();
+        
+        var item = Instantiate(wallObject, position, quaternion.identity);
+        item.transform.eulerAngles = new Vector3(0, 0, 0);
+
+        itemSize = item.transform.localScale;
+        itemSize = new Vector3(size.z, size.y, itemSize.z);
+        item.transform.localScale = itemSize;   
+            
+        itemList = new WallList
+        {
+            wall = item,
+            name = "InnerWall" + currentInnerWalls.Count
+        };
+        currentInnerWalls.Add(itemList);
+    }
+
+    private void GenerateRoom(Vector3 center, int iterations)
+    {
+
+        Vector2 pointOffset = new Vector2(Random.Range(minMaxRoomPoint.x, minMaxRoomPoint.y),
+            Random.Range(minMaxRoomPoint.x, minMaxRoomPoint.y));
+        Vector3 intersectionPoint = new Vector3(center.x + pointOffset.x, center.y, center.z + pointOffset.y);
+
+        Vector3 direction = new Vector3();
+        int dirNumber = Random.Range(0, 4);
+
+        switch (dirNumber)
+        {
+            case 0:
+                direction = Vector3.forward;
+                break;
+            case 1:
+                direction = Vector3.back;
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+        }
+        
+        if (Physics.Raycast(intersectionPoint, ))
+        {
+            
         }
     }
     
