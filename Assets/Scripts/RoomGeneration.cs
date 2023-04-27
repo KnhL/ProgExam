@@ -88,22 +88,24 @@ public class RoomGeneration : MonoBehaviour
          
         MoveOut(item);
         
-        Ray rayTV = new Ray(item.transform.position, item.transform.forward);
-        RaycastHit hitTV;
+        Ray rayTable = new Ray(item.transform.position, item.transform.forward);
+        RaycastHit hitTable;
         
-        if (Physics.Raycast(rayTV, out hitTV))
+        if (Physics.Raycast(rayTable, out hitTable))
         {
-            print(hitTV.transform.name);
-            var TV = Instantiate(Objects[13], transform.position, quaternion.identity);
-            TV.transform.localEulerAngles = new Vector3(0, hitTV.transform.localEulerAngles.y, 0);
-            MoveOut(TV);
+            var Table = Instantiate(Objects[2], transform.position, quaternion.identity);
+            Table.transform.localEulerAngles = new Vector3(0, hitTable.transform.localEulerAngles.y, 0);
+    
             
-            //TV.transform.position += hitTV.transform.position;
-            
-            //if (hit.distance > 3)
-            //{
-            //    TV.transform.position += hit.transform.position;
-            //}
+            if (hitTable.distance > 3)
+            {        
+                Table.transform.position = hitTable.transform.position;
+                MoveOut(Table);   
+            }
+            else
+            {
+                //Table.transform.position = hitTable.transform.position;
+            }
         }
     }
 
@@ -111,13 +113,14 @@ public class RoomGeneration : MonoBehaviour
     {
         Ray ray = new Ray(item.transform.position, -item.transform.forward);
         RaycastHit hit;
-        Collider ItemCollider = item.GetComponent<Collider>();
+        Collider itemCollider = item.GetComponent<Collider>();
         
         if (Physics.Raycast(ray, out hit))
         {
-            print("hit" + hit.transform.name);
+            print("move out hit " + hit.transform.name);
             item.transform.position -= item.transform.forward * hit.distance;
-            item.transform.position += item.transform.forward * (ItemCollider.bounds.extents.magnitude / 2);
+            item.transform.position += item.transform.forward * (itemCollider.bounds.extents.magnitude / 2);
+            print(itemCollider.bounds.extents.magnitude / 2);
         }
         
         Ray rayDown = new Ray(item.transform.position, -item.transform.up);
