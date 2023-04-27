@@ -116,6 +116,12 @@ public class HouseGenerator : MonoBehaviour
         GenerateWall(wall, rightSide, bounds.size, "RIGHT");
         GenerateWall(wall, frontSide, bounds.size, "FRONT");
         GenerateWall(wall, backSide, bounds.size, "BACK");
+
+        foreach (var t in currentInnerWalls)
+        {
+            Destroy(t.wall);
+        }
+        currentInnerWalls.Clear();
         GenerateRoom(bounds.center, 1);
 
         update = false;
@@ -232,16 +238,16 @@ public class HouseGenerator : MonoBehaviour
         }
     }
 
-    private void GenerateWall(GameObject wallObject, Vector3 position, Vector3 size)
+    private void GenerateWall(GameObject wallObject, Vector3 position, Vector3 size, Vector3 lookPos)
     {
         var itemSize = Vector3.zero;
         WallList itemList = new WallList();
         
         var item = Instantiate(wallObject, position, quaternion.identity);
-        item.transform.eulerAngles = new Vector3(0, 0, 0);
+        item.transform.LookAt(lookPos);
 
         itemSize = item.transform.localScale;
-        itemSize = new Vector3(size.z, size.y, itemSize.z);
+        itemSize = new Vector3(itemSize.x, size.y, size.z);
         item.transform.localScale = itemSize;   
             
         itemList = new WallList
@@ -249,22 +255,22 @@ public class HouseGenerator : MonoBehaviour
             wall = item,
             name = "InnerWall" + currentInnerWalls.Count
         };
+        item.name = "InnerWall" + currentInnerWalls.Count;
         currentInnerWalls.Add(itemList);
     }
 
     private void GenerateRoom(Vector3 center, int iterations)
     {
-
+        if (iterations <= 0) { return; }
+        
         Vector2 pointOffset = new Vector2(Random.Range(minMaxRoomPoint.x, minMaxRoomPoint.y),
             Random.Range(minMaxRoomPoint.x, minMaxRoomPoint.y));
-        print(pointOffset);
         Vector3 intersectionPoint = new Vector3(center.x + pointOffset.x, center.y, center.z + pointOffset.y);
-
-        print(intersectionPoint);
+        
         Vector3 direction = new Vector3();
         int dirNumber = Random.Range(0, 4);
-
-        Debug.DrawRay(intersectionPoint, transform.up * 2, Color.red, 10);
+        
+        Debug.DrawRay(intersectionPoint, transform.up * 2, Color.red, 1);
         
         switch (dirNumber)
         {
@@ -282,9 +288,14 @@ public class HouseGenerator : MonoBehaviour
                 break;
         }
         
-        if (Physics.Raycast(intersectionPoint, direction * Mathf.Infinity))
+        Debug.DrawRay(intersectionPoint, direction * 10,  Color.red, 1);
+        
+        if (Physics.Raycast(intersectionPoint, direction * 10, out var hit))
         {
-            
+            Vector3 halfPoint = Vector3.Lerp(intersectionPoint, hit.point, 0.5f);
+            Vector3 wallSize = new Vector3(0, col.bounds.size.y, hit.distance);
+
+            GenerateWall(wall, halfPoint, wallSize, hit.point);
         }
     }
     
