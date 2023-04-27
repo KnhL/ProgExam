@@ -958,7 +958,7 @@ MonoBehaviour:
   currentOuterWalls: []
   currentInnerWalls: []
   update: 0
-  minMaxRoomPoint: {x: 0, y: 0}
+  minMaxRoomPoint: {x: -2, y: 2}
   col: {fileID: 1396358865}
   zMaxBoundPoint: {fileID: 987454320}
   zMinBoundPoint: {fileID: 1143333974}

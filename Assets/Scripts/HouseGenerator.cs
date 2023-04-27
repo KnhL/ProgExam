@@ -116,6 +116,7 @@ public class HouseGenerator : MonoBehaviour
         GenerateWall(wall, rightSide, bounds.size, "RIGHT");
         GenerateWall(wall, frontSide, bounds.size, "FRONT");
         GenerateWall(wall, backSide, bounds.size, "BACK");
+        GenerateRoom(bounds.center, 1);
 
         update = false;
         oldSize = col.bounds.size;
@@ -256,26 +257,32 @@ public class HouseGenerator : MonoBehaviour
 
         Vector2 pointOffset = new Vector2(Random.Range(minMaxRoomPoint.x, minMaxRoomPoint.y),
             Random.Range(minMaxRoomPoint.x, minMaxRoomPoint.y));
+        print(pointOffset);
         Vector3 intersectionPoint = new Vector3(center.x + pointOffset.x, center.y, center.z + pointOffset.y);
 
+        print(intersectionPoint);
         Vector3 direction = new Vector3();
         int dirNumber = Random.Range(0, 4);
 
+        Debug.DrawRay(intersectionPoint, transform.up * 2, Color.red, 10);
+        
         switch (dirNumber)
         {
             case 0:
-                direction = Vector3.forward;
+                direction = transform.forward;
                 break;
             case 1:
-                direction = Vector3.back;
+                direction = -transform.forward;
                 break;
             case 2:
+                direction = transform.right;
                 break;
             case 3:
+                direction = -transform.right;
                 break;
         }
         
-        if (Physics.Raycast(intersectionPoint, ))
+        if (Physics.Raycast(intersectionPoint, direction * Mathf.Infinity))
         {
             
         }
