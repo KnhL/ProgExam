@@ -99,7 +99,7 @@ public class RoomGeneration : MonoBehaviour
             
             if (hitTable.distance > 3)
             {        
-                Table.transform.position = hitTable.transform.position;
+                Table.transform.position = hitTable.point;
                 MoveOut(Table);   
             }
             else
