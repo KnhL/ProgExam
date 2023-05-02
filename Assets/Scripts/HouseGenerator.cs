@@ -46,6 +46,8 @@ public class HouseGenerator : MonoBehaviour
     [SerializeField] private Transform xMaxBoundPoint;
     [SerializeField] private Transform xMinBoundPoint;
 
+    private Coroutine roomGenerator;
+
     private Vector3 oldSize;
 
     private void Update()
@@ -112,7 +114,7 @@ public class HouseGenerator : MonoBehaviour
             Destroy(t.wall);
         }
         currentInnerWalls.Clear();
-        GenerateRoom(bounds.center, 2);
+        roomGenerator = StartCoroutine(GenerateRoom(bounds.center, 2));
 
         update = false;
         oldSize = col.bounds.size;
@@ -249,10 +251,8 @@ public class HouseGenerator : MonoBehaviour
         currentInnerWalls.Add(itemList);
     }
 
-    private void GenerateRoom(Vector3 center, int iterations)
+    private IEnumerator GenerateRoom(Vector3 center, int iterations)
     {
-        if (iterations <= 0) { return; }
-
         Vector2 pointOffset = new Vector2(Random.Range(-col.size.x / 2 * roomPointArea, col.size.x / 2 * roomPointArea),
             Random.Range(-col.size.z / 2 * roomPointArea, col.size.z / 2 * roomPointArea));
         Vector3 intersectionPoint = new Vector3(center.x + pointOffset.x, center.y, center.z + pointOffset.y);
@@ -271,7 +271,7 @@ public class HouseGenerator : MonoBehaviour
             _ => direction
         };
 
-        Debug.DrawRay(intersectionPoint, direction * 100,  Color.red, 0.1f);
+        Debug.DrawRay(intersectionPoint, direction * 100,  Color.red, 1f);
         
         if (Physics.Raycast(intersectionPoint, direction, out var hit, 100, wallMask))
         {
@@ -303,9 +303,12 @@ public class HouseGenerator : MonoBehaviour
             GenerateWall(wall, halfPoint, wallSize, hit2.point);
         }
         
+        // Wait one frame
+        yield return 0;
+        
         if (iterations > 1)
         {
-            GenerateRoom(center, iterations - 1);
+            roomGenerator = StartCoroutine(GenerateRoom(center, iterations - 1));
         }
     }
     
