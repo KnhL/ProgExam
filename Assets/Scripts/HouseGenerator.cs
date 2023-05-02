@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -27,7 +28,9 @@ public class HouseGenerator : MonoBehaviour
 
     [SerializeField] private bool update;
 
-    [SerializeField] private Vector2 minMaxRoomPoint;
+    [Range(0f, 1f)][SerializeField] private float roomPointArea = 0.2f;
+
+    [SerializeField] private LayerMask wallMask;
     
     private Vector3 colCenter;
 
@@ -79,20 +82,6 @@ public class HouseGenerator : MonoBehaviour
         }
     }
 
-    private void OnValidate()
-    {
-        if (!Application.isPlaying)
-        {
-            colCenter = col.center;
-            leftSide = FindBoundSide(Directions.Left);
-            rightSide = FindBoundSide(Directions.Right);
-            frontSide = FindBoundSide(Directions.Front);
-            backSide = FindBoundSide(Directions.Back);
-        
-            update = false;
-        }
-    }
-
     private Vector3 FindBoundSide(Directions direction)
     {
         var bounds = col.bounds;
@@ -119,10 +108,11 @@ public class HouseGenerator : MonoBehaviour
 
         foreach (var t in currentInnerWalls)
         {
+            t.wall.layer = LayerMask.NameToLayer("Default");
             Destroy(t.wall);
         }
         currentInnerWalls.Clear();
-        GenerateRoom(bounds.center, 1);
+        GenerateRoom(bounds.center, 2);
 
         update = false;
         oldSize = col.bounds.size;
@@ -262,40 +252,60 @@ public class HouseGenerator : MonoBehaviour
     private void GenerateRoom(Vector3 center, int iterations)
     {
         if (iterations <= 0) { return; }
-        
-        Vector2 pointOffset = new Vector2(Random.Range(minMaxRoomPoint.x, minMaxRoomPoint.y),
-            Random.Range(minMaxRoomPoint.x, minMaxRoomPoint.y));
+
+        Vector2 pointOffset = new Vector2(Random.Range(-col.size.x / 2 * roomPointArea, col.size.x / 2 * roomPointArea),
+            Random.Range(-col.size.z / 2 * roomPointArea, col.size.z / 2 * roomPointArea));
         Vector3 intersectionPoint = new Vector3(center.x + pointOffset.x, center.y, center.z + pointOffset.y);
         
         Vector3 direction = new Vector3();
         int dirNumber = Random.Range(0, 4);
         
         Debug.DrawRay(intersectionPoint, transform.up * 2, Color.red, 1);
-        
-        switch (dirNumber)
+
+        direction = dirNumber switch
         {
-            case 0:
-                direction = transform.forward;
-                break;
-            case 1:
-                direction = -transform.forward;
-                break;
-            case 2:
-                direction = transform.right;
-                break;
-            case 3:
-                direction = -transform.right;
-                break;
-        }
+            0 => transform.forward,
+            1 => -transform.forward,
+            2 => transform.right,
+            3 => -transform.right,
+            _ => direction
+        };
+
+        Debug.DrawRay(intersectionPoint, direction * 100,  Color.red, 0.1f);
         
-        Debug.DrawRay(intersectionPoint, direction * 10,  Color.red, 1);
-        
-        if (Physics.Raycast(intersectionPoint, direction * 10, out var hit))
+        if (Physics.Raycast(intersectionPoint, direction, out var hit, 100, wallMask))
         {
             Vector3 halfPoint = Vector3.Lerp(intersectionPoint, hit.point, 0.5f);
             Vector3 wallSize = new Vector3(0, col.bounds.size.y, hit.distance);
-
+            
             GenerateWall(wall, halfPoint, wallSize, hit.point);
+        }
+
+        int vectorRotation = Random.Range(0, 2);
+        int vectorMirror = Random.Range(0, 2);
+        Vector3 newDirection = Vector3.zero;
+        
+        if (vectorMirror == 1)
+        {
+            newDirection = Vector3.Lerp(direction, -direction, vectorMirror);
+        }
+        else
+        {
+            direction = Vector3.Lerp(direction, -direction, vectorRotation);
+            newDirection = new Vector3(direction.z, direction.y, direction.x);
+        }
+
+        if (Physics.Raycast(intersectionPoint, newDirection, out var hit2, 100, wallMask))
+        {
+            Vector3 halfPoint = Vector3.Lerp(intersectionPoint, hit2.point, 0.5f);
+            Vector3 wallSize = new Vector3(0, col.bounds.size.y, hit2.distance);
+            
+            GenerateWall(wall, halfPoint, wallSize, hit2.point);
+        }
+        
+        if (iterations > 1)
+        {
+            GenerateRoom(center, iterations - 1);
         }
     }
     
@@ -305,5 +315,7 @@ public class HouseGenerator : MonoBehaviour
         Gizmos.DrawWireSphere(rightSide, .2f);
         Gizmos.DrawWireSphere(frontSide, .2f);
         Gizmos.DrawWireSphere(backSide, .2f);
+        
+        Gizmos.DrawCube(col.center, new Vector3(col.size.x * roomPointArea, col.size.y, col.size.z * roomPointArea));
     }
 }
