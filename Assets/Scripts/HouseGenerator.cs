@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -25,6 +26,8 @@ public class HouseGenerator : MonoBehaviour
 
     [SerializeField] private List<WallList> currentOuterWalls = new List<WallList>();
     [SerializeField] private List<WallList> currentInnerWalls = new List<WallList>();
+    [SerializeField] private List<Vector3> roomCenterPoints = new List<Vector3>();
+    private List<Vector3> intersectionPoints = new List<Vector3>();
 
     [SerializeField] private bool update;
 
@@ -45,6 +48,8 @@ public class HouseGenerator : MonoBehaviour
     [SerializeField] private Transform zMinBoundPoint;
     [SerializeField] private Transform xMaxBoundPoint;
     [SerializeField] private Transform xMinBoundPoint;
+
+    [SerializeField] private float intersectionPointMergeDistance;
 
     private Coroutine roomGenerator;
 
@@ -114,7 +119,9 @@ public class HouseGenerator : MonoBehaviour
             Destroy(t.wall);
         }
         currentInnerWalls.Clear();
-        roomGenerator = StartCoroutine(GenerateRoom(bounds.center, 2));
+        intersectionPoints.Clear();
+        roomCenterPoints.Clear();
+        roomGenerator = StartCoroutine(GenerateRoom(bounds.center, 3));
 
         update = false;
         oldSize = col.bounds.size;
@@ -253,28 +260,41 @@ public class HouseGenerator : MonoBehaviour
 
     private IEnumerator GenerateRoom(Vector3 center, int iterations)
     {
+        Color color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
+        
         Vector2 pointOffset = new Vector2(Random.Range(-col.size.x / 2 * roomPointArea, col.size.x / 2 * roomPointArea),
             Random.Range(-col.size.z / 2 * roomPointArea, col.size.z / 2 * roomPointArea));
         Vector3 intersectionPoint = new Vector3(center.x + pointOffset.x, center.y, center.z + pointOffset.y);
+
+        foreach (var t in intersectionPoints.Where(t => Vector3.Distance(intersectionPoint, t) <= intersectionPointMergeDistance))
+        {
+            intersectionPoint = t;
+        }
+        
+        intersectionPoints.Add(intersectionPoint);
         
         Vector3 direction = new Vector3();
         int dirNumber = Random.Range(0, 4);
         
-        Debug.DrawRay(intersectionPoint, transform.up * 2, Color.red, 1);
+        Debug.DrawRay(intersectionPoint, transform.up * 2, color, 1);
 
+        var right = transform.right;
+        var forward = transform.forward;
         direction = dirNumber switch
         {
-            0 => transform.forward,
-            1 => -transform.forward,
-            2 => transform.right,
-            3 => -transform.right,
+            0 => forward,
+            1 => -forward,
+            2 => right,
+            3 => -right,
             _ => direction
         };
 
-        Debug.DrawRay(intersectionPoint, direction * 100,  Color.red, 1f);
+        
         
         if (Physics.Raycast(intersectionPoint, direction, out var hit, 100, wallMask))
         {
+            Debug.DrawRay(intersectionPoint, direction * Vector3.Distance(intersectionPoint, hit.point),  color, 1f);
+            
             Vector3 halfPoint = Vector3.Lerp(intersectionPoint, hit.point, 0.5f);
             Vector3 wallSize = new Vector3(0, col.bounds.size.y, hit.distance);
             
@@ -282,7 +302,9 @@ public class HouseGenerator : MonoBehaviour
         }
 
         int vectorRotation = Random.Range(0, 2);
-        int vectorMirror = Random.Range(0, 2);
+        
+        // If 1 no mirror
+        int vectorMirror = Random.Range(0, 1);
         Vector3 newDirection = Vector3.zero;
         
         if (vectorMirror == 1)
@@ -297,11 +319,18 @@ public class HouseGenerator : MonoBehaviour
 
         if (Physics.Raycast(intersectionPoint, newDirection, out var hit2, 100, wallMask))
         {
+            Debug.DrawRay(intersectionPoint, newDirection * Vector3.Distance(intersectionPoint, hit2.point),  color, 1f);
+            
             Vector3 halfPoint = Vector3.Lerp(intersectionPoint, hit2.point, 0.5f);
             Vector3 wallSize = new Vector3(0, col.bounds.size.y, hit2.distance);
             
             GenerateWall(wall, halfPoint, wallSize, hit2.point);
         }
+
+        Vector3 roomCenterPoint = Vector3.Lerp(hit.point, hit2.point, 0.5f);
+        roomCenterPoint.y = center.y;
+        roomCenterPoints.Add(roomCenterPoint);
+        Debug.DrawRay(roomCenterPoint, transform.up * 2, color, 1);
         
         // Wait one frame
         yield return 0;
@@ -319,6 +348,8 @@ public class HouseGenerator : MonoBehaviour
         Gizmos.DrawWireSphere(frontSide, .2f);
         Gizmos.DrawWireSphere(backSide, .2f);
         
+        Gizmos.color = Color.green;
+        Gizmos.color = new Color(Gizmos.color.r, Gizmos.color.g, Gizmos.color.b, 0.2f);
         Gizmos.DrawCube(col.center, new Vector3(col.size.x * roomPointArea, col.size.y, col.size.z * roomPointArea));
     }
 }
