@@ -217,7 +217,7 @@ SphereCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 558063531}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
@@ -385,7 +385,7 @@ SphereCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 987454315}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
@@ -505,7 +505,7 @@ SphereCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1143333969}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
@@ -625,7 +625,7 @@ SphereCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1181140520}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.5
@@ -876,7 +876,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 7
+  orthographic size: 8.34
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -899,14 +899,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1261201302}
-  m_LocalRotation: {x: 0.23911765, y: 0.3696438, z: -0.09904577, w: 0.89239913}
-  m_LocalPosition: {x: -10, y: 10, z: -10}
+  m_LocalRotation: {x: 0.37463257, y: 0.34980917, z: -0.15517789, w: 0.844514}
+  m_LocalPosition: {x: -8.51, y: 15.46, z: -8.51}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 30, y: 45, z: 0}
+  m_LocalEulerAnglesHint: {x: 47.845, y: 45, z: 0}
 --- !u!114 &1261201307
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -958,12 +958,16 @@ MonoBehaviour:
   currentOuterWalls: []
   currentInnerWalls: []
   update: 0
-  minMaxRoomPoint: {x: -2, y: 2}
+  roomPointArea: 0.5
+  wallMask:
+    serializedVersion: 2
+    m_Bits: 64
   col: {fileID: 1396358865}
   zMaxBoundPoint: {fileID: 987454320}
   zMinBoundPoint: {fileID: 1143333974}
   xMaxBoundPoint: {fileID: 558063536}
   xMinBoundPoint: {fileID: 1181140525}
+  intersectionPointMergeDistance: 2
 --- !u!65 &1396358865
 BoxCollider:
   m_ObjectHideFlags: 0
