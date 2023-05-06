@@ -1,13 +1,22 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class RoomGeneration : MonoBehaviour
 {
+    [Serializable] private class RoomList
+    {
+        public string name;
+        public List<GameObject> list;
+    }
+    
     private RaycastHit[] hits;
     public List<GameObject> wallList;
+    [SerializeField] private List<RoomList> objectList;
     private int randomWall;
     
     private Vector3 randomWallMaxBound;
@@ -15,6 +24,7 @@ public class RoomGeneration : MonoBehaviour
 
     [SerializeField] private GameObject testCube;
     [SerializeField] private GameObject[] Objects;
+    
      
     // Start is called before the first frame update
     void Start()
@@ -22,7 +32,7 @@ public class RoomGeneration : MonoBehaviour
         randomWall = Random.Range(0, 4);
         wallList = new List<GameObject>();
         FindObjects();
-        TvAndSofa();
+        KitchenRoom();
     }
 
     // Update is called once per frame
@@ -30,10 +40,10 @@ public class RoomGeneration : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            DeleteObjects();
             randomWall = Random.Range(0, 4);
             FindObjects();
-            //LivingRoom();
-            TvAndSofa();
+            KitchenRoom();
         }
     }
 
@@ -57,72 +67,132 @@ public class RoomGeneration : MonoBehaviour
                 hits[i] = new RaycastHit();
             }
         }
-        //Debug.Log("Wall list:");
-        //foreach (GameObject wall in wallList)
-        //{
-        //    Debug.Log(wall.name);
-        //}
     }
 
     private void LivingRoom()
     {
-         
-         randomWallMaxBound = wallList[randomWall].GetComponent<Collider>().bounds.max;
-         randomWallMinBound = wallList[randomWall].GetComponent<Collider>().bounds.min;
-         
-         Instantiate(testCube, randomWallMaxBound, quaternion.identity);
-         Instantiate(testCube, randomWallMinBound, quaternion.identity);
-         
+        var sofa = Instantiate(Objects[11], transform.position, quaternion.identity);
+        objectList[1].list.Add(sofa);
+        sofa.transform.localEulerAngles = new Vector3(0, hits[randomWall].transform.localEulerAngles.y, 0);
+        
+        Ray ray = new Ray(sofa.transform.position, -sofa.transform.forward);
+        RaycastHit hit;
 
-         var item = Instantiate(Objects[11], transform.position, quaternion.identity);
-         item.transform.localEulerAngles = new Vector3(0, hits[randomWall].transform.localEulerAngles.y, 0);
-         
-         MoveOut(item);
-         
-    }
-    
-    private void TvAndSofa()
-    {
-        var item = Instantiate(Objects[11], transform.position, quaternion.identity);
-        item.transform.localEulerAngles = new Vector3(0, hits[randomWall].transform.localEulerAngles.y, 0);
-         
-        MoveOut(item);
+        if (Physics.Raycast(ray, out hit))
+        {
+            sofa.transform.position -= sofa.transform.forward * hit.distance;
+        }
+
+        MoveOut(sofa);
+        MoveDown(sofa);
         
-        Ray rayTable = new Ray(item.transform.position, item.transform.forward);
+        RandomPositionOnWall(sofa);
+
+        Ray rayTable = new Ray(sofa.transform.position, sofa.transform.forward);
         RaycastHit hitTable;
-        
+
         if (Physics.Raycast(rayTable, out hitTable))
         {
-            var Table = Instantiate(Objects[2], transform.position, quaternion.identity);
-            Table.transform.localEulerAngles = new Vector3(0, hitTable.transform.localEulerAngles.y, 0);
-    
+            var tvOrNot = Random.Range(17, 19);
+            var table = Instantiate(Objects[tvOrNot], hitTable.point, quaternion.identity);
+            objectList[1].list.Add(table);
             
-            if (hitTable.distance > 3)
-            {        
-                Table.transform.position = hitTable.point;
-                MoveOut(Table);   
+            table.transform.localEulerAngles = new Vector3(0, hitTable.transform.localEulerAngles.y, 0);
+            
+            if (hitTable.distance > 4)
+            {
+                MoveOut(table);
+                table.transform.position = Vector3.Lerp(table.transform.position, sofa.transform.position, 0.5f);
             }
             else
+            {  
+                MoveOut(table);
+            }
+        }
+    }
+
+    private void RandomPositionOnWall(GameObject item)
+    {
+        Ray ray2 = new Ray(item.transform.position, item.transform.right);
+        RaycastHit hit2;
+        
+        Ray ray3 = new Ray(item.transform.position, -item.transform.right);
+        RaycastHit hit3;
+
+        if (Physics.Raycast(ray2, out hit2) && Physics.Raycast(ray3, out hit3))
+        {
+            item.transform.position = Vector3.Lerp(hit2.point, hit3.point, Random.Range(0.2f, 0.8f));
+        }
+    }
+
+    private void KitchenRoom()
+    {
+        var randomKitchenDigit = RandomKitchenObject();
+        var firstObject = Instantiate(Objects[randomKitchenDigit], transform.position, quaternion.identity);
+        objectList[0].list.Add(firstObject);
+        firstObject.transform.localEulerAngles = new Vector3(0, hits[randomWall].transform.localEulerAngles.y, 0);
+        
+        Ray ray = new Ray(firstObject.transform.position, -firstObject.transform.forward);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit))
+        {
+            firstObject.transform.position -= firstObject.transform.forward * hit.distance;
+        }
+        
+        MoveDown(firstObject);
+        MoveOut(firstObject);
+        
+        RandomPositionOnWall(firstObject);
+        
+        var thisObject = firstObject;
+        var lastObject = firstObject;
+        
+        for (int i = 0; i < 10; i++)
+        {
+            thisObject = lastObject;
+            Ray loopRay = new Ray(lastObject.transform.position, lastObject.transform.right);
+            RaycastHit loopHit;
+            
+            if (Physics.Raycast(loopRay, out loopHit))
             {
-                //Table.transform.position = hitTable.transform.position;
+                if (loopHit.distance > 0.7f)
+                {
+                    thisObject = Instantiate(Objects[RandomKitchenObject()], lastObject.transform.position, lastObject.transform.rotation);
+                    objectList[0].list.Add(thisObject);
+                    Collider thisObjectCol = thisObject.GetComponent<Collider>();
+                    thisObject.transform.position += thisObject.transform.right * (thisObjectCol.bounds.extents.magnitude / 2);
+
+                    lastObject = thisObject;
+                }
+            }
+        }
+    }
+
+    private int RandomKitchenObject()
+    {
+        return Random.Range(2, 8);
+    }
+
+    private void DeleteObjects()
+    {
+        for (int i = 0; i < objectList.Count; i++)
+        {
+            for (int j = 0; j < objectList[i].list.Count; j++)
+            {
+                Destroy(objectList[i].list[j].gameObject);
             }
         }
     }
 
     private void MoveOut(GameObject item)
     {
-        Ray ray = new Ray(item.transform.position, -item.transform.forward);
-        RaycastHit hit;
         Collider itemCollider = item.GetComponent<Collider>();
-        
-        if (Physics.Raycast(ray, out hit))
-        {
-            print("move out hit " + hit.transform.name);
-            item.transform.position -= item.transform.forward * hit.distance;
-            item.transform.position += item.transform.forward * (itemCollider.bounds.extents.magnitude / 2);
-            print(itemCollider.bounds.extents.magnitude / 2);
-        }
-        
+        item.transform.position += item.transform.forward * ((itemCollider.bounds.extents.magnitude / 2) / 2);
+    }
+
+    private void MoveDown(GameObject item)
+    {
         Ray rayDown = new Ray(item.transform.position, -item.transform.up);
         RaycastHit hitDown;
         
