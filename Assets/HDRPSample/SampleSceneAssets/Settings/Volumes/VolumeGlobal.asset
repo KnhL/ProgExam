@@ -1066,10 +1066,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ddcec8a8eb2d684d833ac8f5d26aebd, type: 3}
   m_Name: HDShadowSettings
   m_EditorClassIdentifier: 
-  active: 1
+  active: 0
   maxShadowDistance:
     m_OverrideState: 1
-    m_Value: 70
+    m_Value: 149.37
   directionalTransmissionMultiplier:
     m_OverrideState: 0
     m_Value: 1
@@ -1078,22 +1078,22 @@ MonoBehaviour:
     m_Value: 4
   cascadeShadowSplit0:
     m_OverrideState: 1
-    m_Value: 0.046875
+    m_Value: 0.014285714
   cascadeShadowSplit1:
     m_OverrideState: 1
-    m_Value: 0.140625
+    m_Value: 0.21356364
   cascadeShadowSplit2:
     m_OverrideState: 1
-    m_Value: 0.375
+    m_Value: 0.41428572
   cascadeShadowBorder0:
     m_OverrideState: 1
-    m_Value: 0.6666667
+    m_Value: 1
   cascadeShadowBorder1:
     m_OverrideState: 1
-    m_Value: 0.33333334
+    m_Value: 0.5048606
   cascadeShadowBorder2:
     m_OverrideState: 1
-    m_Value: 0.13333334
+    m_Value: 0.21986473
   cascadeShadowBorder3:
     m_OverrideState: 0
     m_Value: 0
