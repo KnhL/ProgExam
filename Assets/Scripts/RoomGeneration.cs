@@ -51,29 +51,25 @@ public class RoomGeneration : MonoBehaviour
 
     public void GenerateRooms()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        _houseGenerator = FindObjectOfType<HouseGenerator>();
+
+        DeleteObjects();
+
+        foreach (var centerPoint in _houseGenerator.ReturnCenterPoints())
         {
-            _houseGenerator = FindObjectOfType<HouseGenerator>();
+            randomWall = Random.Range(0, 4);
+            FindObjects(centerPoint);
 
-            DeleteObjects();
+            var randomNumber = Random.Range(0, 2);
 
-            foreach (var centerPoint in _houseGenerator.ReturnCenterPoints())
+            if (randomNumber == 1)
             {
-                randomWall = Random.Range(0, 4);
-                FindObjects(centerPoint);
-
-                var randomNumber = Random.Range(0, 2);
-
-                if (randomNumber == 1)
-                {
-                    KitchenRoom(centerPoint);
-                }
-                else if (randomNumber == 0)
-                {
-                    LivingRoom(centerPoint);
-                }
+                KitchenRoom(centerPoint);
             }
-
+            else if (randomNumber == 0)
+            {
+                LivingRoom(centerPoint);
+            }
         }
     }
 
