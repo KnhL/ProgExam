@@ -8,7 +8,6 @@ using Random = UnityEngine.Random;
 
 public class RoomGeneration : MonoBehaviour
 {
-    
     //List of rooms, serializable so it can be seen through the inspector
     [Serializable] private class RoomList
     {
@@ -47,13 +46,12 @@ public class RoomGeneration : MonoBehaviour
     {
         randomWall = Random.Range(0, 4);
         wallList = new List<GameObject>();
+        _houseGenerator = FindObjectOfType<HouseGenerator>();
     }
 
     //Function that generates furniture on positions gotten from HouseGenerator script, each time function is called, previous objects gets deleted, and new ones gets generated.
     public void GenerateFurniture()
     {
-        _houseGenerator = FindObjectOfType<HouseGenerator>();
-
         DeleteObjects();
 
         foreach (var centerPoint in _houseGenerator.ReturnCenterPoints())
@@ -103,9 +101,9 @@ public class RoomGeneration : MonoBehaviour
         //instantiates an object, and adds it to the object list, and sets the objects rotation to the random wall chosen's rotation.
         //Item gets added to the object list after.
         var sofa = Instantiate(Objects[11], centerPoint, quaternion.identity);
-        sofa.transform.localEulerAngles = new Vector3(0, hits[randomWall].transform.localEulerAngles.y, 0);
         objectList[1].list.Add(sofa);
-        
+        sofa.transform.localEulerAngles = new Vector3(0, hits[randomWall].transform.localEulerAngles.y, 0);
+
         //Shoots a ray backwards from the objects position
         Ray ray = new Ray(sofa.transform.position, -sofa.transform.forward);
         RaycastHit hit;
@@ -171,9 +169,9 @@ public class RoomGeneration : MonoBehaviour
         //Item gets added to the object list after.
         var randomKitchenDigit = RandomKitchenObject();
         var firstObject = Instantiate(Objects[randomKitchenDigit], centerPoint, quaternion.identity);
-        firstObject.transform.localEulerAngles = new Vector3(0, hits[randomWall].transform.localEulerAngles.y, 0);
         objectList[0].list.Add(firstObject);
-        
+        firstObject.transform.localEulerAngles = new Vector3(0, hits[randomWall].transform.localEulerAngles.y, 0);
+
         //Shoots a new raycast backwards from the instantiated object.
         Ray ray = new Ray(firstObject.transform.position, -firstObject.transform.forward);
         RaycastHit hit;
