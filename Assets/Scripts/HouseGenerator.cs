@@ -382,11 +382,11 @@ public class HouseGenerator : MonoBehaviour
         // Repeat if iterations is over 1 
         if (iterations > 1)
         {
-            StartCoroutine(GenerateRoom(center, iterations - 1));
+            roomGenerator = StartCoroutine(GenerateRoom(center, iterations - 1));
         }
         else
         {
-            yield return 5;
+            yield return 0;
             roomGen.GenerateFurniture();
         }
     }
@@ -422,6 +422,11 @@ public class HouseGenerator : MonoBehaviour
         }
         
         return Vector3.zero;
+    }
+
+    public void UpdateRooms()
+    {
+        update = true;
     }
 
     private void OnDrawGizmosSelected()
