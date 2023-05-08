@@ -35,41 +35,35 @@ public class RoomGeneration : MonoBehaviour
 
     private HouseGenerator _houseGenerator;
     
-     
     // Start is called before the first frame update
     void Start()
     {
         randomWall = Random.Range(0, 4);
         wallList = new List<GameObject>();
         //FindObjects();
-        
-        
-        //if (generationType == Generate.KitchenRoom)
-        //{
-        //     KitchenRoom();
-        //}
-        //else if (generationType == Generate.LivingRoom)
-        //{
-        //    LivingRoom();
-        //}
     }
 
     // Update is called once per frame
     void Update()
     {
+        
+    }
+
+    public void GenerateRooms()
+    {
         if (Input.GetKeyDown(KeyCode.Space))
         {
             _houseGenerator = FindObjectOfType<HouseGenerator>();
-            
+
             DeleteObjects();
-            
+
             foreach (var centerPoint in _houseGenerator.ReturnCenterPoints())
             {
                 randomWall = Random.Range(0, 4);
                 FindObjects(centerPoint);
 
                 var randomNumber = Random.Range(0, 2);
-                
+
                 if (randomNumber == 1)
                 {
                     KitchenRoom(centerPoint);
@@ -79,6 +73,7 @@ public class RoomGeneration : MonoBehaviour
                     LivingRoom(centerPoint);
                 }
             }
+
         }
     }
 
