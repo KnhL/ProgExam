@@ -110,7 +110,7 @@ public class BoundaryPoint : MonoBehaviour
         {
             case true:
                 isPressed = true;
-                thisMat.SetFloat("_Size", 0.2f);
+                thisMat.SetFloat("_Size", 0.1f);
                 break;
             case false:
                 isPressed = false;
