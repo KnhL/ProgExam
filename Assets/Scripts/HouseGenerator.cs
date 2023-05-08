@@ -2,10 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
+using Quaternion = UnityEngine.Quaternion;
 using Random = UnityEngine.Random;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
 
 public enum Directions
 {
@@ -26,7 +30,7 @@ public class HouseGenerator : MonoBehaviour
 
     [SerializeField] private List<WallList> currentOuterWalls = new List<WallList>();
     [SerializeField] private List<WallList> currentInnerWalls = new List<WallList>();
-    [SerializeField] private List<Vector3> roomCenterPoints = new List<Vector3>();
+    public List<Vector3> roomCenterPoints = new List<Vector3>();
     private List<Vector3> intersectionPoints = new List<Vector3>();
 
     [SerializeField] private bool update;
@@ -50,6 +54,8 @@ public class HouseGenerator : MonoBehaviour
     [SerializeField] private Transform xMinBoundPoint;
 
     [SerializeField] private float intersectionPointMergeDistance;
+    [SerializeField] private float intersectionWallMergeDistance;
+    [SerializeField] private int iterations;
 
     private Coroutine roomGenerator;
 
@@ -104,7 +110,7 @@ public class HouseGenerator : MonoBehaviour
         };
     }
 
-    public void Generate()
+    private void Generate()
     {
         var bounds = col.bounds;
 
@@ -121,7 +127,7 @@ public class HouseGenerator : MonoBehaviour
         currentInnerWalls.Clear();
         intersectionPoints.Clear();
         roomCenterPoints.Clear();
-        roomGenerator = StartCoroutine(GenerateRoom(bounds.center, 3));
+        roomGenerator = StartCoroutine(GenerateRoom(bounds.center, iterations));
 
         update = false;
         oldSize = col.bounds.size;
@@ -266,6 +272,7 @@ public class HouseGenerator : MonoBehaviour
             Random.Range(-col.size.z / 2 * roomPointArea, col.size.z / 2 * roomPointArea));
         Vector3 intersectionPoint = new Vector3(center.x + pointOffset.x, center.y, center.z + pointOffset.y);
 
+        // Merge intersection points that are close to each other
         foreach (var t in intersectionPoints.Where(t => Vector3.Distance(intersectionPoint, t) <= intersectionPointMergeDistance))
         {
             intersectionPoint = t;
@@ -273,13 +280,14 @@ public class HouseGenerator : MonoBehaviour
         
         intersectionPoints.Add(intersectionPoint);
         
+        Debug.DrawRay(intersectionPoint, transform.up * 2, color, 1);
+        
+        // Find wall direction
         Vector3 direction = new Vector3();
         int dirNumber = Random.Range(0, 4);
-        
-        Debug.DrawRay(intersectionPoint, transform.up * 2, color, 1);
-
         var right = transform.right;
         var forward = transform.forward;
+        
         direction = dirNumber switch
         {
             0 => forward,
@@ -288,49 +296,79 @@ public class HouseGenerator : MonoBehaviour
             3 => -right,
             _ => direction
         };
-
         
-        
+        Debug.DrawRay(intersectionPoint, direction * 100,  color, 1f);
+        // Find wall lenght
         if (Physics.Raycast(intersectionPoint, direction, out var hit, 100, wallMask))
         {
-            Debug.DrawRay(intersectionPoint, direction * Vector3.Distance(intersectionPoint, hit.point),  color, 1f);
+            print("test");
+            Debug.DrawLine(intersectionPoint, hit.point,  color, 1f);
+
+            GameObject halfPoint = new GameObject
+            {
+                transform =
+                {
+                    position = Vector3.Lerp(intersectionPoint, hit.point, 0.5f)
+                }
+            };
+
+            halfPoint.transform.LookAt(hit.point);
+
             
-            Vector3 halfPoint = Vector3.Lerp(intersectionPoint, hit.point, 0.5f);
+            // Checks if the wall has to merge with other walls
+            Vector3 mergePoint = GetIntersectionMergePoint(halfPoint, intersectionWallMergeDistance, wallMask);
+
+            if (mergePoint != Vector3.zero)
+            {
+                // Wall is close enough to another wall to merge
+                intersectionPoint += mergePoint;
+                if (Physics.Raycast(intersectionPoint, direction, out hit, 100, wallMask))
+                {
+                    halfPoint.transform.position = Vector3.Lerp(intersectionPoint, hit.point, 0.5f);
+                    halfPoint.transform.LookAt(hit.point);
+                }
+            }
+
             Vector3 wallSize = new Vector3(0, col.bounds.size.y, hit.distance);
             
-            GenerateWall(wall, halfPoint, wallSize, hit.point);
+            GenerateWall(wall, halfPoint.transform.position, wallSize, hit.point);
+            
+            Destroy(halfPoint.gameObject);
         }
 
         int vectorRotation = Random.Range(0, 2);
         
-        // If 1 no mirror
-        int vectorMirror = Random.Range(0, 1);
         Vector3 newDirection = Vector3.zero;
         
-        if (vectorMirror == 1)
-        {
-            newDirection = Vector3.Lerp(direction, -direction, vectorMirror);
-        }
-        else
-        {
-            direction = Vector3.Lerp(direction, -direction, vectorRotation);
-            newDirection = new Vector3(direction.z, direction.y, direction.x);
-        }
+        newDirection = Vector3.Lerp(direction, -direction, vectorRotation);
+        newDirection = new Vector3(newDirection.z, newDirection.y, newDirection.x);
+        
 
+       
+        Debug.DrawRay(intersectionPoint, newDirection * 100,  color, 1f);
         if (Physics.Raycast(intersectionPoint, newDirection, out var hit2, 100, wallMask))
         {
-            Debug.DrawRay(intersectionPoint, newDirection * Vector3.Distance(intersectionPoint, hit2.point),  color, 1f);
+            print("test2");
+            
+            Debug.DrawLine(intersectionPoint, hit2.point,  color, 1f);
             
             Vector3 halfPoint = Vector3.Lerp(intersectionPoint, hit2.point, 0.5f);
             Vector3 wallSize = new Vector3(0, col.bounds.size.y, hit2.distance);
             
             GenerateWall(wall, halfPoint, wallSize, hit2.point);
-        }
 
-        Vector3 roomCenterPoint = Vector3.Lerp(hit.point, hit2.point, 0.5f);
-        roomCenterPoint.y = center.y;
-        roomCenterPoints.Add(roomCenterPoint);
-        Debug.DrawRay(roomCenterPoint, transform.up * 2, color, 1);
+            if (Physics.Raycast(halfPoint, direction, out var roomHit, 100, wallMask)) 
+            {
+                Vector3 roomCenterPoint = Vector3.Lerp(halfPoint, roomHit.point, 0.5f);
+                roomCenterPoint.y = center.y;
+                Debug.DrawRay(roomCenterPoint, transform.up * 2, color, 1);
+                
+                if (roomCenterPoint != Vector3.zero)
+                {
+                    roomCenterPoints.Add(roomCenterPoint);
+                }
+            }
+        }
         
         // Wait one frame
         yield return 0;
@@ -340,7 +378,40 @@ public class HouseGenerator : MonoBehaviour
             roomGenerator = StartCoroutine(GenerateRoom(center, iterations - 1));
         }
     }
-    
+
+    private Vector3 GetIntersectionMergePoint(GameObject start, float mergeLenght, LayerMask layer)
+    {
+        // Check right
+        if (Physics.Raycast(start.transform.position, start.transform.right, out var hitInfo, mergeLenght, layer))
+        {
+            Debug.DrawLine(start.transform.position, hitInfo.point, Color.red, 1);
+            
+            if (hitInfo.transform.eulerAngles == start.transform.eulerAngles ||
+                hitInfo.transform.eulerAngles == new Vector3(start.transform.eulerAngles.x,
+                    start.transform.eulerAngles.y - 180, start.transform.eulerAngles.z)) 
+            {
+                Vector3 betweenVector = hitInfo.point - start.transform.position;
+                return betweenVector;    
+            }
+            
+        }
+        // Check left
+        if (Physics.Raycast(start.transform.position, -start.transform.right, out hitInfo, mergeLenght, layer))
+        {
+            Debug.DrawLine(start.transform.position, hitInfo.point, Color.red, 1);
+            
+            if (hitInfo.transform.eulerAngles == start.transform.eulerAngles ||
+                hitInfo.transform.eulerAngles == new Vector3(start.transform.eulerAngles.x,
+                    start.transform.eulerAngles.y - 180, start.transform.eulerAngles.z)) 
+            {
+                Vector3 betweenVector = hitInfo.point - start.transform.position;
+                return betweenVector;    
+            }
+        }
+        
+        return Vector3.zero;
+    }
+
     private void OnDrawGizmosSelected()
     {
         Gizmos.DrawWireSphere(leftSide, .2f);

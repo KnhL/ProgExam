@@ -957,6 +957,7 @@ MonoBehaviour:
   wall: {fileID: 5460108168596339411, guid: 5ffddee677c825844b28a744e740d17f, type: 3}
   currentOuterWalls: []
   currentInnerWalls: []
+  roomCenterPoints: []
   update: 0
   roomPointArea: 0.5
   wallMask:
@@ -968,6 +969,7 @@ MonoBehaviour:
   xMaxBoundPoint: {fileID: 558063536}
   xMinBoundPoint: {fileID: 1181140525}
   intersectionPointMergeDistance: 2
+  intersectionWallMergeDistance: 1
 --- !u!65 &1396358865
 BoxCollider:
   m_ObjectHideFlags: 0
