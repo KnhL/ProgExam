@@ -8,12 +8,15 @@ using Random = UnityEngine.Random;
 
 public class RoomGeneration : MonoBehaviour
 {
+    
+    //List of rooms, serializable so it can be seen through the inspector
     [Serializable] private class RoomList
     {
         public string name;
         public List<GameObject> list;
     }
 
+    //Enum of rooms that can be generated
     private enum Generate
     {
         LivingRoom,
@@ -21,8 +24,10 @@ public class RoomGeneration : MonoBehaviour
     }
     
     [Header("Settings")]
+    //Based on Generate enum, made to be able to test different room spawns
     [SerializeField] private Generate generationType;
     
+    //Array of raycast hits, to store which objects are the walls.
     private RaycastHit[] hits;
     
     [Header("Variables")]
@@ -40,13 +45,6 @@ public class RoomGeneration : MonoBehaviour
     {
         randomWall = Random.Range(0, 4);
         wallList = new List<GameObject>();
-        //FindObjects();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     public void GenerateFurniture()
