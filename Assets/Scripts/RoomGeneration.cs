@@ -8,12 +8,15 @@ using Random = UnityEngine.Random;
 
 public class RoomGeneration : MonoBehaviour
 {
+    
+    //List of rooms, serializable so it can be seen through the inspector
     [Serializable] private class RoomList
     {
         public string name;
         public List<GameObject> list;
     }
 
+    //Enum of rooms that can be generated
     private enum Generate
     {
         LivingRoom,
@@ -21,34 +24,32 @@ public class RoomGeneration : MonoBehaviour
     }
     
     [Header("Settings")]
+    //Based on Generate enum, made to be able to test different room spawns
     [SerializeField] private Generate generationType;
     
+    //Array of raycast hits, to store which objects are the walls.
     private RaycastHit[] hits;
     
     [Header("Variables")]
     public List<GameObject> wallList;
+    [Header("Spawned Objects")]
     [SerializeField] private List<RoomList> objectList;
     private int randomWall;
 
-    [Header("Spawned Objects")]
+    [Header("Spawnable Objects")]
     [SerializeField] private GameObject[] Objects;
 
+    //Gets HouseGenerator script
     private HouseGenerator _houseGenerator;
-    
-    // Start is called before the first frame update
+
+    //Finds a random number between 0-4, 4 is excluded, and also creates a new wall list.
     void Start()
     {
         randomWall = Random.Range(0, 4);
         wallList = new List<GameObject>();
-        //FindObjects();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
+    //Function that generates furniture on positions gotten from HouseGenerator script, each time function is called, previous objects gets deleted, and new ones gets generated.
     public void GenerateFurniture()
     {
         _houseGenerator = FindObjectOfType<HouseGenerator>();
@@ -73,6 +74,7 @@ public class RoomGeneration : MonoBehaviour
         }
     }
 
+    //Finds the walls surrounding the room, and adds it to the wall list.
     public void FindObjects(Vector3 centerPoint)
     {
         Vector3[] directions = { transform.forward, transform.right, -transform.right, -transform.forward, -transform.up };
@@ -95,28 +97,36 @@ public class RoomGeneration : MonoBehaviour
         }
     }
 
+    //Generates the LivingRoom.
     private void LivingRoom(Vector3 centerPoint)
     {
+        //instantiates an object, and adds it to the object list, and sets the objects rotation to the random wall chosen's rotation.
+        //Item gets added to the object list after.
         var sofa = Instantiate(Objects[11], centerPoint, quaternion.identity);
-        objectList[1].list.Add(sofa);
         sofa.transform.localEulerAngles = new Vector3(0, hits[randomWall].transform.localEulerAngles.y, 0);
+        objectList[1].list.Add(sofa);
         
+        //Shoots a ray backwards from the objects position
         Ray ray = new Ray(sofa.transform.position, -sofa.transform.forward);
         RaycastHit hit;
 
+        //Moves the object back into the wall, based on the raycast.
         if (Physics.Raycast(ray, out hit))
         {
             sofa.transform.position -= sofa.transform.forward * hit.distance;
         }
 
+        //Uses three functions to move the object out from the wall, and down to the floor, and after, a random position along the wall.
         MoveOut(sofa);
         MoveDown(sofa);
-        
         RandomPositionOnWall(sofa);
 
+        //Shoots a new ray forwards from the items position.
         Ray rayTable = new Ray(sofa.transform.position, sofa.transform.forward);
         RaycastHit hitTable;
 
+        //Instantiates a new object based on the raycasts hit point, and choses randomly if the object should contain a TV or not.
+        //Item gets added to the object list after.
         if (Physics.Raycast(rayTable, out hitTable))
         {
             var tvOrNot = Random.Range(17, 19);
@@ -125,6 +135,7 @@ public class RoomGeneration : MonoBehaviour
             
             table.transform.localEulerAngles = new Vector3(0, hitTable.transform.localEulerAngles.y, 0);
             
+            //If the raycast distance from the previous object, is larger than 4, lerp the current object closer to the previous object.
             if (hitTable.distance > 4)
             {
                 MoveOut(table);
@@ -132,11 +143,13 @@ public class RoomGeneration : MonoBehaviour
             }
             else
             {  
+                //If not, keep it along the wall
                 MoveOut(table);
             }
         }
     }
 
+    //Finds two points along a wall, and lerps the item to a random spot along the wall.
     private void RandomPositionOnWall(GameObject item)
     {
         Ray ray2 = new Ray(item.transform.position, item.transform.right);
@@ -151,32 +164,41 @@ public class RoomGeneration : MonoBehaviour
         }
     }
 
+    //Generates the KitchenRoom
     private void KitchenRoom(Vector3 centerPoint)
     {
+        //Gets a random kitchen object, instantiates an object, adds it to the object list, and sets the objects rotation to the random wall chosen's rotation.
+        //Item gets added to the object list after.
         var randomKitchenDigit = RandomKitchenObject();
         var firstObject = Instantiate(Objects[randomKitchenDigit], centerPoint, quaternion.identity);
-        objectList[0].list.Add(firstObject);
         firstObject.transform.localEulerAngles = new Vector3(0, hits[randomWall].transform.localEulerAngles.y, 0);
+        objectList[0].list.Add(firstObject);
         
+        //Shoots a new raycast backwards from the instantiated object.
         Ray ray = new Ray(firstObject.transform.position, -firstObject.transform.forward);
         RaycastHit hit;
 
+        //Based on the raycast, moves the object back to the wall that the raycast hit.
         if (Physics.Raycast(ray, out hit))
         {
             firstObject.transform.position -= firstObject.transform.forward * hit.distance;
         }
         
+        //Uses three functions to move the object out from the wall, and down to the floor, and after, a random position along the wall.
         MoveDown(firstObject);
         MoveOut(firstObject);
-        
         RandomPositionOnWall(firstObject);
         
+        //Sets the first instantiated object to thisObject and lastObject, so the first loop is based on the first object.
         var thisObject = firstObject;
         var lastObject = firstObject;
         
+        //For loop that generates the kitchen based on the first instantiated object.
         for (int i = 0; i < 10; i++)
         {
             thisObject = lastObject;
+            
+            //Shoots a new raycast to the right of the previous object.
             Ray loopRay = new Ray(lastObject.transform.position, lastObject.transform.right);
             RaycastHit loopHit;
             
@@ -184,22 +206,28 @@ public class RoomGeneration : MonoBehaviour
             {
                 if (loopHit.distance > 0.7f)
                 {
+                    //Instantiates a new random kitchen object, based on the previous object, and adds it to the object list.
                     thisObject = Instantiate(Objects[RandomKitchenObject()], lastObject.transform.position, lastObject.transform.rotation);
                     objectList[0].list.Add(thisObject);
+                    
+                    //Gets the new instantiated objects collider, and uses the colliders size to move the object to the right.
                     Collider thisObjectCol = thisObject.GetComponent<Collider>();
                     thisObject.transform.position += thisObject.transform.right * (thisObjectCol.bounds.extents.magnitude / 2);
 
+                    //Sets the current instantiated object, to the last object, and runs the loop again.
                     lastObject = thisObject;
                 }
             }
         }
     }
 
+    //Gives a random number between 2-8, and returns it. 8 is excluded.
     private int RandomKitchenObject()
     {
         return Random.Range(2, 8);
     }
 
+    //Goes along the object list, and deletes all objects in the list.
     private void DeleteObjects()
     {
         for (int i = 0; i < objectList.Count; i++)
@@ -211,12 +239,14 @@ public class RoomGeneration : MonoBehaviour
         }
     }
 
+    //Takes the collider of the item, and moves the item forward based on the colliders size.
     private void MoveOut(GameObject item)
     {
         Collider itemCollider = item.GetComponent<Collider>();
         item.transform.position += item.transform.forward * ((itemCollider.bounds.extents.magnitude / 2) / 2);
     }
 
+    //Sends a raycast downwards from the item, and moves the item down based on the raycast distance.
     private void MoveDown(GameObject item)
     {
         Ray rayDown = new Ray(item.transform.position, -item.transform.up);
