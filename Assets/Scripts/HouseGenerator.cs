@@ -95,6 +95,11 @@ public class HouseGenerator : MonoBehaviour
         }
     }
 
+    public List<Vector3> ReturnCenterPoints()
+    {
+        return roomCenterPoints;
+    }
+
     private Vector3 FindBoundSide(Directions direction)
     {
         var bounds = col.bounds;

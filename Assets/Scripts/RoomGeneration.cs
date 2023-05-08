@@ -13,17 +13,27 @@ public class RoomGeneration : MonoBehaviour
         public string name;
         public List<GameObject> list;
     }
+
+    private enum Generate
+    {
+        LivingRoom,
+        KitchenRoom,
+    }
+    
+    [Header("Settings")]
+    [SerializeField] private Generate generationType;
     
     private RaycastHit[] hits;
+    
+    [Header("Variables")]
     public List<GameObject> wallList;
     [SerializeField] private List<RoomList> objectList;
     private int randomWall;
-    
-    private Vector3 randomWallMaxBound;
-    private Vector3 randomWallMinBound;
 
-    [SerializeField] private GameObject testCube;
+    [Header("Spawned Objects")]
     [SerializeField] private GameObject[] Objects;
+
+    private HouseGenerator _houseGenerator;
     
      
     // Start is called before the first frame update
@@ -31,8 +41,17 @@ public class RoomGeneration : MonoBehaviour
     {
         randomWall = Random.Range(0, 4);
         wallList = new List<GameObject>();
-        FindObjects();
-        KitchenRoom();
+        //FindObjects();
+        
+        
+        //if (generationType == Generate.KitchenRoom)
+        //{
+        //     KitchenRoom();
+        //}
+        //else if (generationType == Generate.LivingRoom)
+        //{
+        //    LivingRoom();
+        //}
     }
 
     // Update is called once per frame
@@ -40,20 +59,36 @@ public class RoomGeneration : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            _houseGenerator = FindObjectOfType<HouseGenerator>();
+            
             DeleteObjects();
-            randomWall = Random.Range(0, 4);
-            FindObjects();
-            KitchenRoom();
+            
+            foreach (var centerPoint in _houseGenerator.ReturnCenterPoints())
+            {
+                randomWall = Random.Range(0, 4);
+                FindObjects(centerPoint);
+
+                var randomNumber = Random.Range(0, 2);
+                
+                if (randomNumber == 1)
+                {
+                    KitchenRoom(centerPoint);
+                }
+                else if (randomNumber == 0)
+                {
+                    LivingRoom(centerPoint);
+                }
+            }
         }
     }
 
-    public void FindObjects()
+    public void FindObjects(Vector3 centerPoint)
     {
         Vector3[] directions = { transform.forward, transform.right, -transform.right, -transform.forward, -transform.up };
         hits = new RaycastHit[5];
         for (int i = 0; i < directions.Length; i++)
         {
-            Ray ray = new Ray(transform.position, directions[i]);
+            Ray ray = new Ray(centerPoint, directions[i]);
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
                 hits[i] = hit;
@@ -69,9 +104,9 @@ public class RoomGeneration : MonoBehaviour
         }
     }
 
-    private void LivingRoom()
+    private void LivingRoom(Vector3 centerPoint)
     {
-        var sofa = Instantiate(Objects[11], transform.position, quaternion.identity);
+        var sofa = Instantiate(Objects[11], centerPoint, quaternion.identity);
         objectList[1].list.Add(sofa);
         sofa.transform.localEulerAngles = new Vector3(0, hits[randomWall].transform.localEulerAngles.y, 0);
         
@@ -125,10 +160,10 @@ public class RoomGeneration : MonoBehaviour
         }
     }
 
-    private void KitchenRoom()
+    private void KitchenRoom(Vector3 centerPoint)
     {
         var randomKitchenDigit = RandomKitchenObject();
-        var firstObject = Instantiate(Objects[randomKitchenDigit], transform.position, quaternion.identity);
+        var firstObject = Instantiate(Objects[randomKitchenDigit], centerPoint, quaternion.identity);
         objectList[0].list.Add(firstObject);
         firstObject.transform.localEulerAngles = new Vector3(0, hits[randomWall].transform.localEulerAngles.y, 0);
         
