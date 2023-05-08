@@ -326,7 +326,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 269275337}
-  - component: {fileID: 269275338}
   m_Layer: 0
   m_Name: Room1
   m_TagString: Untagged
@@ -349,45 +348,58 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &269275338
+--- !u!1 &599828507
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 599828509}
+  - component: {fileID: 599828508}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &599828508
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 269275336}
+  m_GameObject: {fileID: 599828507}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33c727727f286f6488b72ab92ca20fdc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  generationType: 1
+  generationType: 0
   wallList: []
   objectList:
   - name: KitchenObjects
     list: []
   - name: LivingRoom
     list: []
-  Objects:
-  - {fileID: 7640340272931599746, guid: c64d64732aca91e45b1962785c69e07f, type: 3}
-  - {fileID: 2643801119695845602, guid: 014ba3fb468cdcf429141dee494d6758, type: 3}
-  - {fileID: 7448186784601651264, guid: 0cb7480ec34b5ef4f8d3d18e585839a9, type: 3}
-  - {fileID: 7448186784601651264, guid: 0cb7480ec34b5ef4f8d3d18e585839a9, type: 3}
-  - {fileID: 7448186784601651264, guid: 0cb7480ec34b5ef4f8d3d18e585839a9, type: 3}
-  - {fileID: 1655903460118429450, guid: b4d24ca9f2b710d419eea162a8494a71, type: 3}
-  - {fileID: 1353706165170339304, guid: 8c69d5860197b12418f98a3dcdfc0a9a, type: 3}
-  - {fileID: 59073971302955854, guid: a51770de045e5924c9a9bfa2317825c1, type: 3}
-  - {fileID: 3979318645558728213, guid: 515df6b8b67a6544da440e613d72b25c, type: 3}
-  - {fileID: 2120087317143378192, guid: fdb5afc795dfef047bc1653ee1adfbfb, type: 3}
-  - {fileID: 5343547354551601116, guid: ffa19bd21a0d02345840a4d22a6d98c8, type: 3}
-  - {fileID: 7223310264316905594, guid: 64342a28d4b501b4d8e47843c3d79ca0, type: 3}
-  - {fileID: 3388119696849908725, guid: 0c9a2a5fb37e0e94694a003328c89c42, type: 3}
-  - {fileID: 3631381373288575217, guid: 8e0cb3b8f1245e14eaeb83e7305ac606, type: 3}
-  - {fileID: 643375183933509154, guid: ce796977a336f4e4da627a3723e46558, type: 3}
-  - {fileID: 6045650702746239327, guid: e2db8abcbb35b184eaa126dfb4bd9455, type: 3}
-  - {fileID: 4402426354740765784, guid: 69d87d1112dba4c4289bd922c8d1af4a, type: 3}
-  - {fileID: 3388119696849908725, guid: 0ac18ea78a2340a48af3a3b00524e42b, type: 3}
-  - {fileID: 3388119696849908725, guid: 0c9a2a5fb37e0e94694a003328c89c42, type: 3}
+  Objects: []
+--- !u!4 &599828509
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 599828507}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.23, y: 5.19, z: 6.74}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &697893910
 GameObject:
   m_ObjectHideFlags: 0
@@ -1681,9 +1693,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1963850764}
-  - component: {fileID: 1963850765}
   m_Layer: 0
-  m_Name: Room1 (1)
+  m_Name: Room2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1704,42 +1715,3 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1963850765
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1963850763}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 33c727727f286f6488b72ab92ca20fdc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  generationType: 0
-  wallList: []
-  objectList:
-  - name: KitchenObjects
-    list: []
-  - name: LivingRoom
-    list: []
-  Objects:
-  - {fileID: 7640340272931599746, guid: c64d64732aca91e45b1962785c69e07f, type: 3}
-  - {fileID: 2643801119695845602, guid: 014ba3fb468cdcf429141dee494d6758, type: 3}
-  - {fileID: 7448186784601651264, guid: 0cb7480ec34b5ef4f8d3d18e585839a9, type: 3}
-  - {fileID: 7448186784601651264, guid: 0cb7480ec34b5ef4f8d3d18e585839a9, type: 3}
-  - {fileID: 7448186784601651264, guid: 0cb7480ec34b5ef4f8d3d18e585839a9, type: 3}
-  - {fileID: 1655903460118429450, guid: b4d24ca9f2b710d419eea162a8494a71, type: 3}
-  - {fileID: 1353706165170339304, guid: 8c69d5860197b12418f98a3dcdfc0a9a, type: 3}
-  - {fileID: 59073971302955854, guid: a51770de045e5924c9a9bfa2317825c1, type: 3}
-  - {fileID: 3979318645558728213, guid: 515df6b8b67a6544da440e613d72b25c, type: 3}
-  - {fileID: 2120087317143378192, guid: fdb5afc795dfef047bc1653ee1adfbfb, type: 3}
-  - {fileID: 5343547354551601116, guid: ffa19bd21a0d02345840a4d22a6d98c8, type: 3}
-  - {fileID: 7223310264316905594, guid: 64342a28d4b501b4d8e47843c3d79ca0, type: 3}
-  - {fileID: 3388119696849908725, guid: 0c9a2a5fb37e0e94694a003328c89c42, type: 3}
-  - {fileID: 3631381373288575217, guid: 8e0cb3b8f1245e14eaeb83e7305ac606, type: 3}
-  - {fileID: 643375183933509154, guid: ce796977a336f4e4da627a3723e46558, type: 3}
-  - {fileID: 6045650702746239327, guid: e2db8abcbb35b184eaa126dfb4bd9455, type: 3}
-  - {fileID: 4402426354740765784, guid: 69d87d1112dba4c4289bd922c8d1af4a, type: 3}
-  - {fileID: 3388119696849908725, guid: 0ac18ea78a2340a48af3a3b00524e42b, type: 3}
-  - {fileID: 3388119696849908725, guid: 0c9a2a5fb37e0e94694a003328c89c42, type: 3}
