@@ -28,6 +28,7 @@ public class HouseGenerator : MonoBehaviour
         public string name;
     }
 
+    [SerializeField] private RoomGeneration roomGen;
     [SerializeField] private List<WallList> currentOuterWalls = new List<WallList>();
     [SerializeField] private List<WallList> currentInnerWalls = new List<WallList>();
     public List<Vector3> roomCenterPoints = new List<Vector3>();
@@ -378,9 +379,14 @@ public class HouseGenerator : MonoBehaviour
         // Wait one frame
         yield return 0;
         
+        // Repeat if iterations is over 1 
         if (iterations > 1)
         {
             roomGenerator = StartCoroutine(GenerateRoom(center, iterations - 1));
+        }
+        else
+        {
+            roomGen.GenerateRooms();
         }
     }
 
