@@ -21,6 +21,7 @@ public enum Directions
 public class HouseGenerator : MonoBehaviour
 {
     public GameObject wall;
+    [SerializeField] private GameObject floor;
 
     [Serializable] private class WallList
     {
@@ -28,6 +29,7 @@ public class HouseGenerator : MonoBehaviour
         public string name;
     }
 
+    [SerializeField] private RoomGeneration roomGen;
     [SerializeField] private List<WallList> currentOuterWalls = new List<WallList>();
     [SerializeField] private List<WallList> currentInnerWalls = new List<WallList>();
     public List<Vector3> roomCenterPoints = new List<Vector3>();
@@ -124,6 +126,9 @@ public class HouseGenerator : MonoBehaviour
         GenerateWall(wall, frontSide, bounds.size, "FRONT");
         GenerateWall(wall, backSide, bounds.size, "BACK");
 
+        floor.transform.position = new Vector3(col.center.x, 0, col.center.z);
+        floor.transform.localScale = new Vector3(col.size.x, 0.1f, col.size.z);
+        
         foreach (var t in currentInnerWalls)
         {
             t.wall.layer = LayerMask.NameToLayer("Default");
@@ -140,8 +145,6 @@ public class HouseGenerator : MonoBehaviour
 
     private void GenerateWall(GameObject wallObject, Vector3 position, Vector3 size, string type)
     {
-        //print("WallGen");
-
         GameObject item;
         var itemSize = Vector3.zero;
         WallList itemList = new WallList();
@@ -269,6 +272,7 @@ public class HouseGenerator : MonoBehaviour
         currentInnerWalls.Add(itemList);
     }
 
+    // ReSharper disable Unity.PerformanceAnalysis
     private IEnumerator GenerateRoom(Vector3 center, int iterations)
     {
         Color color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
@@ -306,7 +310,6 @@ public class HouseGenerator : MonoBehaviour
         // Find wall lenght
         if (Physics.Raycast(intersectionPoint, direction, out var hit, 100, wallMask))
         {
-            print("test");
             Debug.DrawLine(intersectionPoint, hit.point,  color, 1f);
 
             GameObject halfPoint = new GameObject
@@ -353,8 +356,6 @@ public class HouseGenerator : MonoBehaviour
         Debug.DrawRay(intersectionPoint, newDirection * 100,  color, 1f);
         if (Physics.Raycast(intersectionPoint, newDirection, out var hit2, 100, wallMask))
         {
-            print("test2");
-            
             Debug.DrawLine(intersectionPoint, hit2.point,  color, 1f);
             
             Vector3 halfPoint = Vector3.Lerp(intersectionPoint, hit2.point, 0.5f);
@@ -378,9 +379,15 @@ public class HouseGenerator : MonoBehaviour
         // Wait one frame
         yield return 0;
         
+        // Repeat if iterations is over 1 
         if (iterations > 1)
         {
-            roomGenerator = StartCoroutine(GenerateRoom(center, iterations - 1));
+            StartCoroutine(GenerateRoom(center, iterations - 1));
+        }
+        else
+        {
+            yield return 5;
+            roomGen.GenerateFurniture();
         }
     }
 
