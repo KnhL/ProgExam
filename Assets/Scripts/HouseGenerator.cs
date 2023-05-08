@@ -20,25 +20,25 @@ public enum Directions
 }
 public class HouseGenerator : MonoBehaviour
 {
-    public GameObject wall;
-    [SerializeField] private GameObject floor;
-
     [Serializable] private class WallList
     {
         public GameObject wall;
         public string name;
     }
 
-    [SerializeField] private RoomGeneration roomGen;
-    [SerializeField] private List<WallList> currentOuterWalls = new List<WallList>();
-    [SerializeField] private List<WallList> currentInnerWalls = new List<WallList>();
-    public List<Vector3> roomCenterPoints = new List<Vector3>();
+    
+    private List<WallList> currentOuterWalls = new List<WallList>();
+    private List<WallList> currentInnerWalls = new List<WallList>();
+    
     private List<Vector3> intersectionPoints = new List<Vector3>();
 
-    [SerializeField] private bool update;
+    
 
+    [Header("Parameters")]
     [Range(0f, 1f)][SerializeField] private float roomPointArea = 0.2f;
-
+    [SerializeField] private float intersectionPointMergeDistance;
+    [SerializeField] private float intersectionWallMergeDistance;
+    [SerializeField] private int iterations;
     [SerializeField] private LayerMask wallMask;
     
     private Vector3 colCenter;
@@ -48,16 +48,22 @@ public class HouseGenerator : MonoBehaviour
     private Vector3 frontSide;
     private Vector3 backSide;
     
+    [Header("Components")]
     [SerializeField] private BoxCollider col;
+    [SerializeField] private RoomGeneration roomGen;
+    public GameObject wall;
+    [SerializeField] private GameObject floor;
 
+    [Header("BoundaryPoints")]
     [SerializeField] private Transform zMaxBoundPoint;
     [SerializeField] private Transform zMinBoundPoint;
     [SerializeField] private Transform xMaxBoundPoint;
     [SerializeField] private Transform xMinBoundPoint;
 
-    [SerializeField] private float intersectionPointMergeDistance;
-    [SerializeField] private float intersectionWallMergeDistance;
-    [SerializeField] private int iterations;
+    [Header("Debug")]
+    [SerializeField] private bool update;
+    public List<Vector3> roomCenterPoints = new List<Vector3>();
+    
 
     private Coroutine roomGenerator;
 
@@ -275,6 +281,8 @@ public class HouseGenerator : MonoBehaviour
     // ReSharper disable Unity.PerformanceAnalysis
     private IEnumerator GenerateRoom(Vector3 center, int iterations)
     {
+        if (iterations == 0){StopCoroutine(roomGenerator); }
+
         Color color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
         
         Vector2 pointOffset = new Vector2(Random.Range(-col.size.x / 2 * roomPointArea, col.size.x / 2 * roomPointArea),

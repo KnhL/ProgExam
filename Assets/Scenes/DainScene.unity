@@ -1887,25 +1887,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c08e0bee56cc0541b0bc820ad8f5166, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wall: {fileID: 5460108168596339411, guid: 5ffddee677c825844b28a744e740d17f, type: 3}
-  floor: {fileID: 1474491983}
-  roomGen: {fileID: 639016226}
-  currentOuterWalls: []
-  currentInnerWalls: []
-  roomCenterPoints: []
-  update: 0
   roomPointArea: 0.5
+  intersectionPointMergeDistance: 2
+  intersectionWallMergeDistance: 2
+  iterations: 0
   wallMask:
     serializedVersion: 2
     m_Bits: 64
   col: {fileID: 1396358865}
+  roomGen: {fileID: 639016226}
+  wall: {fileID: 5460108168596339411, guid: 5ffddee677c825844b28a744e740d17f, type: 3}
+  floor: {fileID: 1474491983}
   zMaxBoundPoint: {fileID: 987454320}
   zMinBoundPoint: {fileID: 1143333974}
   xMaxBoundPoint: {fileID: 558063536}
   xMinBoundPoint: {fileID: 1181140525}
-  intersectionPointMergeDistance: 2
-  intersectionWallMergeDistance: 3
-  iterations: 3
+  update: 0
+  roomCenterPoints: []
 --- !u!65 &1396358865
 BoxCollider:
   m_ObjectHideFlags: 0
