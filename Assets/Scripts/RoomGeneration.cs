@@ -13,17 +13,27 @@ public class RoomGeneration : MonoBehaviour
         public string name;
         public List<GameObject> list;
     }
+
+    private enum Generate
+    {
+        LivingRoom,
+        KitchenRoom,
+    }
+    
+    [Header("Settings")]
+    [SerializeField] private Generate generationType;
     
     private RaycastHit[] hits;
+    
+    [Header("Variables")]
     public List<GameObject> wallList;
     [SerializeField] private List<RoomList> objectList;
     private int randomWall;
-    
-    private Vector3 randomWallMaxBound;
-    private Vector3 randomWallMinBound;
 
-    [SerializeField] private GameObject testCube;
+    [Header("Spawned Objects")]
     [SerializeField] private GameObject[] Objects;
+
+    private HouseGenerator _houseGenerator;
     
      
     // Start is called before the first frame update
@@ -32,7 +42,17 @@ public class RoomGeneration : MonoBehaviour
         randomWall = Random.Range(0, 4);
         wallList = new List<GameObject>();
         FindObjects();
-        KitchenRoom();
+
+        _houseGenerator = FindObjectOfType<HouseGenerator>();
+        
+        if (generationType == Generate.KitchenRoom)
+        {
+            KitchenRoom();
+        }
+        else if (generationType == Generate.LivingRoom)
+        {
+            LivingRoom();
+        }
     }
 
     // Update is called once per frame
@@ -43,7 +63,20 @@ public class RoomGeneration : MonoBehaviour
             DeleteObjects();
             randomWall = Random.Range(0, 4);
             FindObjects();
-            KitchenRoom();
+
+            //foreach (var centerPoints in _houseGenerator.ReturnCenterPoints())
+            //{
+                
+            //}
+
+            if (generationType == Generate.KitchenRoom)
+            {
+                KitchenRoom();
+            }
+            else if (generationType == Generate.LivingRoom)
+            {
+                LivingRoom();
+            }
         }
     }
 
