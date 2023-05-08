@@ -49,7 +49,7 @@ public class RoomGeneration : MonoBehaviour
         
     }
 
-    public void GenerateRooms()
+    public void GenerateFurniture()
     {
         _houseGenerator = FindObjectOfType<HouseGenerator>();
 
