@@ -77,21 +77,22 @@ public class HouseGenerator : MonoBehaviour
         
         Vector3 center = new Vector3(centerX, centerY, centerZ);
 
-        Vector3 size = new Vector3(Vector3.Distance(xMinBoundPoint.position, xMaxBoundPoint.position), col.size.y,
-            Vector3.Distance(zMaxBoundPoint.position, zMinBoundPoint.position));
+        float sizeX = Vector3.Distance(xMinBoundPoint.position, xMaxBoundPoint.position);
+        float sizeY = col.size.y;
+        float sizeZ = Vector3.Distance(zMaxBoundPoint.position, zMinBoundPoint.position);
+        
+        Vector3 size = new Vector3(sizeX, sizeY, sizeZ);
         
         col.center = center;
         col.size = size;
 
-        var bounds1 = col.bounds;
-        xMaxBoundPoint.position = new Vector3(bounds1.max.x, centerY, centerZ);
-        xMinBoundPoint.position = new Vector3(bounds1.min.x, centerY, centerZ);
-        zMaxBoundPoint.position = new Vector3(centerX, centerY, bounds1.max.z);
-        zMinBoundPoint.position = new Vector3(centerX, centerY, bounds1.min.z);
+        var bounds = col.bounds;
+        xMaxBoundPoint.position = new Vector3(bounds.max.x, centerY, centerZ);
+        xMinBoundPoint.position = new Vector3(bounds.min.x, centerY, centerZ);
+        zMaxBoundPoint.position = new Vector3(centerX, centerY, bounds.max.z);
+        zMinBoundPoint.position = new Vector3(centerX, centerY, bounds.min.z);
         
-
-        colCenter = col.center;
-
+        
         leftSide = FindBoundSide(Directions.Left);
         rightSide = FindBoundSide(Directions.Right);
         frontSide = FindBoundSide(Directions.Front);
@@ -112,7 +113,8 @@ public class HouseGenerator : MonoBehaviour
     {
         var bounds = col.bounds;
         var position = transform.position;
-        
+        colCenter = col.center;
+
         return direction switch
         {
             Directions.Left => new Vector3(colCenter.x+ position.x, colCenter.y + position.y, bounds.max.z),
@@ -299,7 +301,9 @@ public class HouseGenerator : MonoBehaviour
         
         Debug.DrawRay(intersectionPoint, transform.up * 2, color, 1);
         
-        // Find wall direction
+        // First Wall
+        
+        // Find raycast direction
         Vector3 direction = new Vector3();
         int dirNumber = Random.Range(0, 4);
         var right = transform.right;
@@ -315,7 +319,9 @@ public class HouseGenerator : MonoBehaviour
         };
         
         Debug.DrawRay(intersectionPoint, direction * 100,  color, 1f);
-        // Find wall lenght
+        
+        // Find wall lenght and position
+        
         if (Physics.Raycast(intersectionPoint, direction, out var hit, 100, wallMask))
         {
             Debug.DrawLine(intersectionPoint, hit.point,  color, 1f);
@@ -352,6 +358,8 @@ public class HouseGenerator : MonoBehaviour
             Destroy(halfPoint.gameObject);
         }
 
+        // Second wall
+        
         int vectorRotation = Random.Range(0, 2);
         
         Vector3 newDirection = Vector3.zero;

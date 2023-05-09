@@ -1890,7 +1890,7 @@ MonoBehaviour:
   roomPointArea: 0.5
   intersectionPointMergeDistance: 2
   intersectionWallMergeDistance: 2
-  iterations: 0
+  iterations: 2
   wallMask:
     serializedVersion: 2
     m_Bits: 64
